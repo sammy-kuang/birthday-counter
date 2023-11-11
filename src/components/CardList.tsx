@@ -1,37 +1,84 @@
 import React, { Component } from 'react';
 import { BirthdayCard } from './BirthdayCard';
-import dayjs from 'dayjs';
-import { formatDuration, intervalToDuration, isAfter, isBefore, isValid } from 'date-fns'
+// import dayjs from 'dayjs';
+import { formatDuration, intervalToDuration, isBefore } from 'date-fns'
 import { Birthday } from '../model/Birthday';
 
-interface List {
+interface CardListState {
     cards: Birthday[];
+    nextBirthdayIdx: number;
 }
 
-export class CardList extends Component<{}, List> {
-    constructor(props: List) {
+export class CardList extends Component<{}, CardListState> {
+    private timer: NodeJS.Timeout | undefined; // represent the timer for updating the view every second
+    private interval: number = 1000; // every second
+
+    constructor(props: CardListState) {
         super(props);
         this.state = {
-            cards: []
+            cards: [],
+            nextBirthdayIdx: 0
         };
+
+        this.getNextBirthday.bind(this)
+    }
+
+    componentDidMount(): void {
+        this.timer = setInterval(() => {
+            this.setState((prevState) => ({ cards: prevState.cards, nextBirthdayIdx: this.getNextBirthday() }))
+        }, this.interval);
+    }
+
+    componentWillUnmount(): void {
+        if (this.timer) {
+            clearInterval(this.timer)
+        }
     }
 
     addBlankCard() {
-        const n : Birthday = {title: "New", date : dayjs('2004-01-01').toDate()};
-        this.setState((prevState) => ({cards: [...prevState.cards, n]}))
+        const n: Birthday = { title: "New", date: BirthdayCard.STARTING_DATE.toDate() };
+        this.setState((prevState) => ({ cards: [...prevState.cards, n], nextBirthdayIdx: prevState.nextBirthdayIdx }))
     }
 
     onCardChange(index: number, newTitle: string, newDate: Date) {
         const newState = this.state.cards;
-        newState[index] = {title: newTitle, date : newDate};
-        this.setState(({cards: newState}));
+        newState[index] = { title: newTitle, date: newDate };
+        this.setState((prevState) => ({ cards: newState, nextBirthdayIdx: prevState.nextBirthdayIdx }));
+    }
+
+    generateDateAfterNow(monthInd : number, day : number) {
+        var now : Date = new Date(Date.now());
+        var out : Date = new Date(now.getFullYear(), monthInd, day);
+
+        if (isBefore(out, now)) {
+            out.setFullYear(now.getFullYear() + 1);
+        }
+
+        return out;
+    } 
+
+    getNextBirthday(): number {
+        var n: number = 0;
+
+        for (let i = n; i < this.state.cards.length; i++) {
+            var ad = this.state.cards[i].date;
+            var bd = this.state.cards[n].date;
+            var a : Date = this.generateDateAfterNow(ad.getMonth(), ad.getDate());
+            var b : Date = this.generateDateAfterNow(bd.getMonth(), bd.getDate());
+
+            if (isBefore(a, b)) {
+                n = i;
+            }
+        }
+
+        return n;
     }
 
     calculateTimeBirthday() {
         if (this.state.cards.length < 1)
             return "n/a";
 
-        var n: Birthday = this.state.cards[0];
+        var n: Birthday = this.state.cards[this.state.nextBirthdayIdx];
         var d: Date = n.date;
         var now: Date = new Date(Date.now());
         var next = new Date(now.getFullYear(), d.getMonth(), d.getDate());
@@ -40,7 +87,23 @@ export class CardList extends Component<{}, List> {
             next.setFullYear(now.getFullYear() + 1);
         }
 
-        return next.toString();
+        const duration: Duration = intervalToDuration({ start: now, end: next })
+        var out = formatDuration(duration).replace(" month", "mth").replace(" days", "d").replace(" hour", "hr").replace(" minute", "min").replace(" second", "sec");
+        return n.title + " in " + out
+    }
+
+    deleteCard(idx : number) {
+        var x : Birthday[] = [];
+
+        for (let i = 0; i < this.state.cards.length; i++) {
+            if (i !== idx) {
+                x.push(this.state.cards[i])
+            }
+        }
+
+        this.setState((prevState) => (
+            {cards: x, nextBirthdayIdx: 0}
+        ))
     }
 
     render() {
@@ -51,13 +114,13 @@ export class CardList extends Component<{}, List> {
                 </header>
 
                 <header className="Subheader">
-                    Days until next birthday: {this.calculateTimeBirthday()}
+                    Coming up: {this.calculateTimeBirthday()}
                 </header>
 
 
                 {this.state.cards.map((card, idx) => (
                     <div>
-                        <BirthdayCard title={card.title} date={card.date} onUpdated={(newTitle, newDate) => { this.onCardChange(idx, newTitle, newDate) }}></BirthdayCard>
+                        <BirthdayCard title={card.title} date={card.date} onDelete={() => this.deleteCard(idx)} onUpdated={(newTitle, newDate) => { this.onCardChange(idx, newTitle, newDate) }}></BirthdayCard>
                     </div>
                 ))};
 

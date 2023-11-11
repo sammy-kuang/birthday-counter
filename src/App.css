@@ -37,6 +37,11 @@
   background-color: #151515
 }
 
+.BirthdayCardButton:hover {
+  background-color: #171717;
+  transition: 0.2s
+}
+
 .BirthdayCardText {
   text-align: left;
   align-self: left;
