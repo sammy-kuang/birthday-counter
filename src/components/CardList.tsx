@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { BirthdayCard } from './BirthdayCard';
 // import dayjs from 'dayjs';
 import { formatDuration, intervalToDuration, isBefore } from 'date-fns'
-import { Birthday } from '../model/Birthday';
+import { Birthday, loadBirthdays, serializeBirthdays } from '../model/Birthday';
 
 interface CardListState {
     cards: Birthday[];
@@ -11,12 +11,16 @@ interface CardListState {
 
 export class CardList extends Component<{}, CardListState> {
     private timer: NodeJS.Timeout | undefined; // represent the timer for updating the view every second
-    private interval: number = 1000; // every second
+    private interval: number = 500; // every half second
 
     constructor(props: CardListState) {
         super(props);
+
+        var loadStorage = localStorage.getItem("birthdays")
+        var arr : Birthday[] = loadStorage ? loadBirthdays(loadStorage) : []
+
         this.state = {
-            cards: [],
+            cards: arr,
             nextBirthdayIdx: 0
         };
 
@@ -35,15 +39,23 @@ export class CardList extends Component<{}, CardListState> {
         }
     }
 
+    updateState(newState : CardListState) {
+        this.setState(newState)
+        // serialize into localStorage
+        localStorage.setItem("birthdays", serializeBirthdays(newState.cards))
+    }
+
     addBlankCard() {
         const n: Birthday = { title: "New", date: BirthdayCard.STARTING_DATE.toDate() };
-        this.setState((prevState) => ({ cards: [...prevState.cards, n], nextBirthdayIdx: prevState.nextBirthdayIdx }))
+        // this.setState((prevState) => ({ cards: [...prevState.cards, n], nextBirthdayIdx: prevState.nextBirthdayIdx }))
+        this.updateState({cards: [...this.state.cards, n], nextBirthdayIdx: this.state.nextBirthdayIdx})
     }
 
     onCardChange(index: number, newTitle: string, newDate: Date) {
         const newState = this.state.cards;
         newState[index] = { title: newTitle, date: newDate };
-        this.setState((prevState) => ({ cards: newState, nextBirthdayIdx: prevState.nextBirthdayIdx }));
+        // this.setState((prevState) => ({ cards: newState, nextBirthdayIdx: prevState.nextBirthdayIdx }));
+        this.updateState({ cards: newState, nextBirthdayIdx: this.state.nextBirthdayIdx })
     }
 
     generateDateAfterNow(monthInd : number, day : number) {
@@ -101,9 +113,11 @@ export class CardList extends Component<{}, CardListState> {
             }
         }
 
-        this.setState((prevState) => (
-            {cards: x, nextBirthdayIdx: 0}
-        ))
+        // this.setState((prevState) => (
+        //     {cards: x, nextBirthdayIdx: 0}
+        // ))
+
+        this.updateState({cards: x, nextBirthdayIdx: 0})
     }
 
     render() {

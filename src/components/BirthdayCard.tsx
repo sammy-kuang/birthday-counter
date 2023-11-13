@@ -1,8 +1,8 @@
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { DateField, DatePicker } from '@mui/x-date-pickers';
+import { DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import React, { Component, useState } from 'react';
+import { Component } from 'react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/en' // import locale
 import { Birthday } from '../model/Birthday';
@@ -17,7 +17,6 @@ interface CardProp {
 }
 
 export class BirthdayCard extends Component<CardProp, Birthday>{
-
     public static STARTING_DATE: dayjs.Dayjs = dayjs('2004-06-17')
 
     constructor(props: CardProp) {
@@ -38,7 +37,7 @@ export class BirthdayCard extends Component<CardProp, Birthday>{
         return (
             <div className="content">
                 <div className="BirthdayCard">
-                    <input type="text" className="BirthdayCardText" defaultValue={"New"} onChange={(event) => {
+                    <input type="text" className="BirthdayCardText" defaultValue={this.state.title} onChange={(event) => {
                         this.setState((prevState) => ({ title: event.target.value, date: prevState.date }))
                         console.log(event.target.value, this.state.title)
                         this.props.onUpdated(event.target.value, this.state.date)
@@ -49,7 +48,7 @@ export class BirthdayCard extends Component<CardProp, Birthday>{
                             <ThemeProvider theme={theme}>
                                 <DatePicker
                                     sx={{ bgcolor: 'background.paper' }}
-                                    value={BirthdayCard.STARTING_DATE}
+                                    value={dayjs(this.state.date)}
                                     onChange={(value) => {
                                         if (value != null) {
                                             this.setState({ title: this.state.title, date: value.toDate() })
