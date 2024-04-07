@@ -113,6 +113,26 @@ export class CardList extends Component<{}, CardListState> {
         return n.title + " in " + out
     }
 
+    renderTodayBirthday() {
+        for (let i = 0; i < this.state.cards.length; i++) {
+            let birthday: Birthday = this.state.cards[i]
+            let date = birthday.date
+            let now = new Date(Date.now())
+            let nowMonth = now.getMonth()
+            let nowDay = now.getDate()
+
+            if (date.getMonth() === nowMonth && date.getDate() === nowDay) {
+                return (
+                    <header className="TodayBirthday">
+                        Today's Birthday: {birthday.title}
+                    </header>
+                );
+            }
+        }
+        return null
+    }
+
+
     deleteCard(idx: number) {
         var x: Birthday[] = [];
 
@@ -138,6 +158,8 @@ export class CardList extends Component<{}, CardListState> {
                 <header className="App-header">
                     Birthday Countdown Tool
                 </header>
+
+                {this.renderTodayBirthday()}
 
                 <header className="Subheader">
                     Coming up: {this.calculateTimeBirthday()}

@@ -79,3 +79,9 @@
   padding-bottom: 3%;
   color: white;
 }
+
+.TodayBirthday {
+  font-size: calc(10px + 2.0vmin);
+  padding-bottom: 2%;
+  color: gold;
+}
