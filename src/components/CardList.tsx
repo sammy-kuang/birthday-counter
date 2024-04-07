@@ -124,7 +124,7 @@ export class CardList extends Component<{}, CardListState> {
             if (date.getMonth() === nowMonth && date.getDate() === nowDay) {
                 return (
                     <header className="TodayBirthday">
-                        Today's Birthday: {birthday.title}
+                        🎉 Today's Birthday: {birthday.title} 🎉
                     </header>
                 );
             }
@@ -183,6 +183,7 @@ export class CardList extends Component<{}, CardListState> {
                         className="BirthdayCardTextInput"
                         id="BirthdayCardTextInput"
                         defaultValue={this.jsonChange}
+                        alt="Press enter to update"
                         onKeyDown={this.onTextBoxUpdate}
                         onChange={(event) => { this.jsonChange = event.target.value }}
                     >

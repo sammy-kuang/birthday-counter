@@ -37,9 +37,8 @@ export class BirthdayCard extends Component<CardProp, Birthday>{
         return (
             <div className="content">
                 <div className="BirthdayCard">
-                    <input type="text" className="BirthdayCardText" defaultValue={this.state.title} onChange={(event) => {
+                    <input type="text" className="BirthdayCardText" defaultValue={this.state.title} onBlur={(event) => {
                         this.setState((prevState) => ({ title: event.target.value, date: prevState.date }))
-                        console.log(event.target.value, this.state.title)
                         this.props.onUpdated(event.target.value, this.state.date)
                     }}>
                     </input>
