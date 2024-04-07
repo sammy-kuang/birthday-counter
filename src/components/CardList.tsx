@@ -13,18 +13,23 @@ export class CardList extends Component<{}, CardListState> {
     private timer: NodeJS.Timeout | undefined; // represent the timer for updating the view every second
     private interval: number = 500; // every half second
 
+    private jsonChange: string = "";
+
     constructor(props: CardListState) {
         super(props);
 
         var loadStorage = localStorage.getItem("birthdays")
-        var arr : Birthday[] = loadStorage ? loadBirthdays(loadStorage) : []
+        var arr: Birthday[] = loadStorage ? loadBirthdays(loadStorage) : []
 
         this.state = {
             cards: arr,
-            nextBirthdayIdx: 0
+            nextBirthdayIdx: 0,
         };
 
+        this.jsonChange = serializeBirthdays(this.state.cards)
+
         this.getNextBirthday.bind(this)
+        this.onTextBoxUpdate = this.onTextBoxUpdate.bind(this)
     }
 
     componentDidMount(): void {
@@ -39,35 +44,39 @@ export class CardList extends Component<{}, CardListState> {
         }
     }
 
-    updateState(newState : CardListState) {
+    updateState(newState: CardListState) {
         this.setState(newState)
         // serialize into localStorage
         localStorage.setItem("birthdays", serializeBirthdays(newState.cards))
+
+        // update the text box
+        this.jsonChange = serializeBirthdays(newState.cards)
+        const textBox = document.getElementById("BirthdayCardTextInput") as HTMLInputElement
+        textBox.value = this.jsonChange
     }
 
     addBlankCard() {
         const n: Birthday = { title: "New", date: BirthdayCard.STARTING_DATE.toDate() };
-        // this.setState((prevState) => ({ cards: [...prevState.cards, n], nextBirthdayIdx: prevState.nextBirthdayIdx }))
-        this.updateState({cards: [...this.state.cards, n], nextBirthdayIdx: this.state.nextBirthdayIdx})
+        var x = [...this.state.cards, n]
+        this.updateState({ cards: x, nextBirthdayIdx: this.state.nextBirthdayIdx })
     }
 
     onCardChange(index: number, newTitle: string, newDate: Date) {
         const newState = this.state.cards;
         newState[index] = { title: newTitle, date: newDate };
-        // this.setState((prevState) => ({ cards: newState, nextBirthdayIdx: prevState.nextBirthdayIdx }));
         this.updateState({ cards: newState, nextBirthdayIdx: this.state.nextBirthdayIdx })
     }
 
-    generateDateAfterNow(monthInd : number, day : number) {
-        var now : Date = new Date(Date.now());
-        var out : Date = new Date(now.getFullYear(), monthInd, day);
+    generateDateAfterNow(monthInd: number, day: number) {
+        var now: Date = new Date(Date.now());
+        var out: Date = new Date(now.getFullYear(), monthInd, day);
 
         if (isBefore(out, now)) {
             out.setFullYear(now.getFullYear() + 1);
         }
 
         return out;
-    } 
+    }
 
     getNextBirthday(): number {
         var n: number = 0;
@@ -75,8 +84,8 @@ export class CardList extends Component<{}, CardListState> {
         for (let i = n; i < this.state.cards.length; i++) {
             var ad = this.state.cards[i].date;
             var bd = this.state.cards[n].date;
-            var a : Date = this.generateDateAfterNow(ad.getMonth(), ad.getDate());
-            var b : Date = this.generateDateAfterNow(bd.getMonth(), bd.getDate());
+            var a: Date = this.generateDateAfterNow(ad.getMonth(), ad.getDate());
+            var b: Date = this.generateDateAfterNow(bd.getMonth(), bd.getDate());
 
             if (isBefore(a, b)) {
                 n = i;
@@ -104,8 +113,8 @@ export class CardList extends Component<{}, CardListState> {
         return n.title + " in " + out
     }
 
-    deleteCard(idx : number) {
-        var x : Birthday[] = [];
+    deleteCard(idx: number) {
+        var x: Birthday[] = [];
 
         for (let i = 0; i < this.state.cards.length; i++) {
             if (i !== idx) {
@@ -113,11 +122,14 @@ export class CardList extends Component<{}, CardListState> {
             }
         }
 
-        // this.setState((prevState) => (
-        //     {cards: x, nextBirthdayIdx: 0}
-        // ))
+        this.updateState({ cards: x, nextBirthdayIdx: 0 })
+    }
 
-        this.updateState({cards: x, nextBirthdayIdx: 0})
+    onTextBoxUpdate(event: React.KeyboardEvent) {
+        if (event.key === "Enter") {
+            var newCards = loadBirthdays(((event.target) as HTMLInputElement).value)
+            this.updateState({ cards: newCards, nextBirthdayIdx: 0 })
+        }
     }
 
     render() {
@@ -142,6 +154,17 @@ export class CardList extends Component<{}, CardListState> {
                     <button className="BirthdayCardButton" onClick={() => { this.addBlankCard() }}>
                         <p className="BirthdayCardText">Add new birthday</p>
                     </button>
+                </div>
+
+                <div className="content">
+                    <input type="text"
+                        className="BirthdayCardTextInput"
+                        id="BirthdayCardTextInput"
+                        defaultValue={this.jsonChange}
+                        onKeyDown={this.onTextBoxUpdate}
+                        onChange={(event) => { this.jsonChange = event.target.value }}
+                    >
+                    </input>
                 </div>
 
             </div>
