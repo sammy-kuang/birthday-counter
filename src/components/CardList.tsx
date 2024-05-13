@@ -122,7 +122,7 @@ export class CardList extends Component<{}, CardListState> {
             let nowDay = now.getDate()
 
             if (date.getMonth() === nowMonth && date.getDate() === nowDay) {
-                let interval = intervalToDuration({start: date, end: now}).years
+                let interval = intervalToDuration({ start: date, end: now }).years
                 if (interval) {
                     return (
                         <header className="TodayBirthday">
@@ -138,13 +138,7 @@ export class CardList extends Component<{}, CardListState> {
 
 
     deleteCard(idx: number) {
-        var x: Birthday[] = [];
-
-        for (let i = 0; i < this.state.cards.length; i++) {
-            if (i !== idx) {
-                x.push(this.state.cards[i])
-            }
-        }
+        var x: Birthday[] = this.state.cards.filter((item, i) => i !== idx);
 
         this.updateState({ cards: x, nextBirthdayIdx: 0 })
     }
@@ -170,11 +164,13 @@ export class CardList extends Component<{}, CardListState> {
                 </header>
 
 
-                {this.state.cards.map((card, idx) => (
-                    <div>
-                        <BirthdayCard title={card.title} date={card.date} onDelete={() => this.deleteCard(idx)} onUpdated={(newTitle, newDate) => { this.onCardChange(idx, newTitle, newDate) }}></BirthdayCard>
-                    </div>
-                ))};
+                <ul>
+                    {this.state.cards.map((card, idx) => (
+                        <li key={card.title+":"+idx}>
+                            <BirthdayCard title={card.title} date={card.date} onDelete={() => this.deleteCard(idx)} onUpdated={(newTitle, newDate) => { this.onCardChange(idx, newTitle, newDate) }}></BirthdayCard>
+                        </li>
+                    ))};
+                </ul>
 
                 <div className="content">
                     <button className="BirthdayCardButton" onClick={() => { this.addBlankCard() }}>

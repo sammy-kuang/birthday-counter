@@ -87,3 +87,8 @@
   padding-bottom: 0.1%;
   color: gold;
 }
+
+ul {
+  list-style: none;
+  padding-left: 0;
+}
