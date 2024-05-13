@@ -122,11 +122,15 @@ export class CardList extends Component<{}, CardListState> {
             let nowDay = now.getDate()
 
             if (date.getMonth() === nowMonth && date.getDate() === nowDay) {
-                return (
-                    <header className="TodayBirthday">
-                        🎉 Today's Birthday: {birthday.title} 🎉
-                    </header>
-                );
+                let interval = intervalToDuration({start: date, end: now}).years
+                if (interval) {
+                    return (
+                        <header className="TodayBirthday">
+                            <p>🎉 Today's Birthday: {birthday.title} 🎉</p>
+                            <p>{birthday.title} is {interval} {Math.abs(interval) > 1 ? "years" : "year"} old!</p>
+                        </header>
+                    );
+                }
             }
         }
         return null

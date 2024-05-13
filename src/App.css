@@ -68,20 +68,22 @@
 }
 
 .App-header {
-  font-size: calc(10px + 2vmin);
+  font-size: calc(12px + 2vmin);
   padding-top: 1%;
-  padding-bottom: 1.5%;
+  padding-bottom: 1%;
   color: white;
 }
 
 .Subheader {
   font-size: calc(10px + 1.2vmin);
-  padding-bottom: 3%;
+  padding-top: 1%;
+  padding-bottom: 2%;
   color: white;
 }
 
 .TodayBirthday {
-  font-size: calc(10px + 2.0vmin);
-  padding-bottom: 2%;
+  font-size: calc(10px + 1.5vmin);
+  text-decoration: underline;
+  padding-bottom: 0.1%;
   color: gold;
 }
